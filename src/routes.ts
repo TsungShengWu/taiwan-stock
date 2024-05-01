@@ -10,3 +10,8 @@ export enum Segment {
   DIVIDEND_POLICY = 'dividend-policy',
   E_REPORT = 'e-report',
 }
+
+export const Pathname = {
+  getMonthlyRevenue: (stockId: string) =>
+    `/${Segment.ANALYSIS}/${stockId}/${Segment.MONTHLY_REVENUE}`,
+};

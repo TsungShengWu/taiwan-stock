@@ -5,3 +5,12 @@ export interface StockInfo {
   industry_category: string;
   date: string;
 }
+
+export interface MonthlyRevenue {
+  stock_id: string;
+  country: string;
+  date: string;
+  revenue: number;
+  revenue_month: number;
+  revenue_year: number;
+}

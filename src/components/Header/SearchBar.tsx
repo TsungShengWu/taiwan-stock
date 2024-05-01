@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Autocomplete, TextField } from '@mui/material';
 import { getStockInfoList } from '@/actions';
+import { Pathname } from '@/routes';
 
 interface Option {
   label: string;
@@ -11,6 +13,14 @@ interface Option {
 
 export default function SearchBar() {
   const [options, setOptions] = useState<Option[]>([]);
+  const { push } = useRouter();
+
+  const handleChange = useCallback(
+    (_: any, option: Option | null) => {
+      if (option) push(Pathname.getMonthlyRevenue(option.id));
+    },
+    [push],
+  );
 
   useEffect(() => {
     async function getData() {
@@ -44,6 +54,7 @@ export default function SearchBar() {
       renderInput={(props) => (
         <TextField {...props} placeholder="輸入台股代號，查看公司價值" />
       )}
+      onChange={handleChange}
     />
   );
 }
