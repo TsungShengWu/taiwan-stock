@@ -4,8 +4,8 @@ import ToggleTheme from './ToggleTheme';
 
 export default function Header() {
   return (
-    <AppBar color="default">
-      <Toolbar>
+    <AppBar color="default" position="static">
+      <Toolbar variant="dense">
         <Stack
           direction="row"
           justifyContent="space-between"
