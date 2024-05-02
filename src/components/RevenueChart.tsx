@@ -14,8 +14,9 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
-import { Chart, ChartProps } from 'react-chartjs-2';
+import { Chart } from 'react-chartjs-2';
 import { useCustomTheme } from '@/theme';
+import { MonthlyRevenueData } from '@/types';
 
 ChartJs.register(
   BarElement,
@@ -30,57 +31,16 @@ ChartJs.register(
   Tooltip,
 );
 
-type CustomChartProps = ChartProps<'bar' | 'line', number[], string>['options'];
-
-export default function RevenueChart() {
+export default function RevenueChart({ data }: { data: MonthlyRevenueData[] }) {
   const { palette } = useCustomTheme();
 
-  const options = useMemo<CustomChartProps>(
-    () => ({
-      responsive: true,
-      scales: {
-        x: {
-          ticks: { color: palette.text.primary },
-          grid: { color: palette.divider },
-        },
-        yLine: {
-          type: 'linear',
-          display: true,
-          position: 'right',
-          title: {
-            display: true,
-            text: '%',
-            color: palette.text.primary,
-          },
-          ticks: {
-            color: palette.text.primary,
-            stepSize: 1,
-          },
-          grid: { drawOnChartArea: false },
-        },
-        yBar: {
-          type: 'linear',
-          display: true,
-          position: 'left',
-          title: {
-            display: true,
-            text: '千元',
-            color: palette.text.primary,
-          },
-          ticks: {
-            color: palette.text.primary,
-            callback: (value) => Number(value) / 1000,
-          },
-          grid: { color: palette.divider },
-        },
-      },
-      plugins: {
-        legend: {
-          labels: { color: palette.text.primary },
-        },
-      },
-    }),
-    [palette],
+  const [lineData, barData, labels] = useMemo(
+    () => [
+      data.map((d) => d.growthRate),
+      data.map((d) => d.monthlyRevenue),
+      data.map((d) => `${d.year}-${d.month > 9 ? '' : '0'}${d.month}`),
+    ],
+    [data],
   );
 
   return (
@@ -93,7 +53,7 @@ export default function RevenueChart() {
             label: '單月營收年增率(%)',
             yAxisID: 'yLine',
             borderColor: `rgba(${palette.error.mainChannel} / 0.8)`,
-            data: [50, 50, 50, 50],
+            data: lineData,
           },
           {
             type: 'bar',
@@ -102,12 +62,61 @@ export default function RevenueChart() {
             backgroundColor: `rgba(${palette.warning.lightChannel} / 0.5)`,
             borderWidth: 1,
             borderColor: palette.warning.main,
-            data: [1000, 2000, 3000, 4000],
+            data: barData,
           },
         ],
-        labels: ['January', 'February', 'March', 'April'],
+        labels,
       }}
-      options={options}
+      options={{
+        responsive: true,
+        scales: {
+          x: {
+            ticks: {
+              color: palette.text.primary,
+              callback: (_, idx) => {
+                const { year, month } = data[idx];
+                return month === 1 ? year : undefined;
+              },
+            },
+            grid: { color: palette.divider },
+          },
+          yLine: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: '%',
+              color: palette.text.primary,
+            },
+            ticks: {
+              color: palette.text.primary,
+              stepSize: 1,
+            },
+            grid: { drawOnChartArea: false },
+          },
+          yBar: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: '千元',
+              color: palette.text.primary,
+            },
+            ticks: {
+              color: palette.text.primary,
+              callback: (value) => Number(value) / 1000,
+            },
+            grid: { color: palette.divider },
+          },
+        },
+        plugins: {
+          legend: {
+            labels: { color: palette.text.primary },
+          },
+        },
+      }}
     />
   );
 }

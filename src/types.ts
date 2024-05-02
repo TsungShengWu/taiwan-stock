@@ -14,3 +14,10 @@ export interface MonthlyRevenue {
   revenue_month: number;
   revenue_year: number;
 }
+
+export interface MonthlyRevenueData {
+  year: number;
+  month: number;
+  monthlyRevenue: number;
+  growthRate?: number;
+}
