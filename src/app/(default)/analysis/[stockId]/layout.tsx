@@ -8,7 +8,7 @@ export default function AnalysisLayout({
 }) {
   return (
     <Container maxWidth="lg">
-      <Box display="flex" pt={3} gap={2}>
+      <Box display="flex" pt={3} pb={3} gap={2}>
         <AnalysisMenu />
         {children}
       </Box>

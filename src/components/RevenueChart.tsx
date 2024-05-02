@@ -38,7 +38,7 @@ export default function RevenueChart({ data }: { data: MonthlyRevenueData[] }) {
     () => [
       data.map((d) => d.growthRate),
       data.map((d) => d.monthlyRevenue),
-      data.map((d) => `${d.year}-${d.month > 9 ? '' : '0'}${d.month}`),
+      data.map((d) => `${d.year}${d.month > 9 ? '' : '0'}${d.month}`),
     ],
     [data],
   );
@@ -104,10 +104,7 @@ export default function RevenueChart({ data }: { data: MonthlyRevenueData[] }) {
               text: '千元',
               color: palette.text.primary,
             },
-            ticks: {
-              color: palette.text.primary,
-              callback: (value) => Number(value) / 1000,
-            },
+            ticks: { color: palette.text.primary },
             grid: { color: palette.divider },
           },
         },

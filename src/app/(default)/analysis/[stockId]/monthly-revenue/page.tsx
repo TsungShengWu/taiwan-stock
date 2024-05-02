@@ -15,6 +15,7 @@ import {
 import { StockInfo, MonthlyRevenueData } from '@/types';
 import { getStockInfoList, getMonthlyRevenue } from '@/actions';
 import RevenueChart from '@/components/RevenueChart';
+import RevenueTable from '@/components/RevenueTable';
 
 const SectionPaper = styled(Paper)(({ theme }) => ({
   padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
@@ -69,7 +70,7 @@ export default function MonthlyRevenuePage({
           newData.push({
             year: curData.revenue_year,
             month: curData.revenue_month,
-            monthlyRevenue: curData.revenue,
+            monthlyRevenue: curData.revenue / 1000,
             growthRate: lastYearData
               ? (curData.revenue / lastYearData.revenue - 1) * 100
               : undefined,
@@ -82,7 +83,7 @@ export default function MonthlyRevenuePage({
   }, [stockId, years]);
 
   return (
-    <Stack flex={1} spacing={2}>
+    <Stack flex={1} minWidth={300} spacing={2}>
       {stockInfo ? (
         <SectionPaper variant="outlined">
           <Typography variant="h6" fontWeight="bold">
@@ -110,6 +111,16 @@ export default function MonthlyRevenuePage({
             </Select>
           </Box>
           <RevenueChart data={revenueData} />
+        </SectionPaper>
+      ) : (
+        <Skeleton variant="rounded" height={48} />
+      )}
+      {revenueData ? (
+        <SectionPaper variant="outlined">
+          <Typography variant="h6" fontWeight="bold" marginBottom={2}>
+            詳細數據
+          </Typography>
+          <RevenueTable data={revenueData} />
         </SectionPaper>
       ) : (
         <Skeleton variant="rounded" height={48} />
