@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { styled, Stack, Paper, Typography, Skeleton } from '@mui/material';
 import { StockInfo, MonthlyRevenue } from '@/types';
 import { getStockInfoList, getMonthlyRevenue } from '@/actions';
+import RevenueChart from '@/components/RevenueChart';
 
 const SectionPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(1),
@@ -15,7 +16,7 @@ export default function MonthlyRevenuePage({
   params: { stockId: string };
 }) {
   const [stockInfo, setStockInfo] = useState<StockInfo>();
-  const [monthlyRevenue, setMonthlyRevenue] = useState<MonthlyRevenue[]>([]);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<MonthlyRevenue[]>();
 
   useEffect(() => {
     if (stockId) {
@@ -37,12 +38,19 @@ export default function MonthlyRevenuePage({
   }, [stockId]);
 
   return (
-    <Stack flex={1}>
+    <Stack flex={1} spacing={2}>
       {stockInfo ? (
         <SectionPaper variant="outlined">
           <Typography variant="h6" fontWeight="bold">
             {`${stockInfo.stock_name} (${stockInfo.stock_id})`}
           </Typography>
+        </SectionPaper>
+      ) : (
+        <Skeleton variant="rounded" height={48} />
+      )}
+      {monthlyRevenue ? (
+        <SectionPaper variant="outlined">
+          <RevenueChart />
         </SectionPaper>
       ) : (
         <Skeleton variant="rounded" height={48} />
