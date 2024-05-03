@@ -29,6 +29,7 @@ export default function MonthlyRevenuePage({
   const [stockInfo, setStockInfo] = useState<StockInfo>();
   const [revenueData, setRevenueData] = useState<MonthlyRevenueData[]>();
   const [years, setYears] = useState('3');
+  const [error, setError] = useState<string>();
 
   const handleChange = useCallback((e: SelectChangeEvent) => {
     setYears(e.target.value);
@@ -38,7 +39,7 @@ export default function MonthlyRevenuePage({
     if (stockId) {
       getStockInfoList(stockId).then((data) => {
         if (!data.length) {
-          throw new Error('此公司不存在');
+          setError('此公司不存在');
         }
         setStockInfo(data[0]);
       });
@@ -59,30 +60,36 @@ export default function MonthlyRevenuePage({
       );
       const startDate = now.toJSON().split('T')[0];
 
-      getMonthlyRevenue(stockId, startDate, endDate).then((data) => {
-        // The number of data might be less than expected.
-        const end = Math.max(data.length - ys * 12, 0);
-        const newData = [] as MonthlyRevenueData[];
+      getMonthlyRevenue(stockId, startDate, endDate)
+        .then((data) => {
+          // The number of data might be less than expected.
+          const end = Math.max(data.length - ys * 12, 0);
+          const newData = [] as MonthlyRevenueData[];
 
-        for (let i = data.length - 1; i >= end; i--) {
-          const curData = data[i];
-          const lastYearData = data[i - 12];
-          newData.push({
-            year: curData.revenue_year,
-            month: curData.revenue_month,
-            monthlyRevenue: curData.revenue / 1000,
-            growthRate: lastYearData
-              ? (curData.revenue / lastYearData.revenue - 1) * 100
-              : undefined,
-          });
-        }
+          for (let i = data.length - 1; i >= end; i--) {
+            const curData = data[i];
+            const lastYearData = data[i - 12];
+            newData.push({
+              year: curData.revenue_year,
+              month: curData.revenue_month,
+              monthlyRevenue: curData.revenue / 1000,
+              growthRate: lastYearData
+                ? (curData.revenue / lastYearData.revenue - 1) * 100
+                : undefined,
+            });
+          }
 
-        setRevenueData(newData.reverse());
-      });
+          setRevenueData(newData.reverse());
+        })
+        .catch((e) => setError(e.message));
     }
   }, [stockId, years]);
 
-  return (
+  return error ? (
+    <Typography variant="h6" flex="1" textAlign="center" fontWeight="bold">
+      {error}
+    </Typography>
+  ) : (
     <Stack flex={1} minWidth={300} spacing={2}>
       {stockInfo ? (
         <SectionPaper variant="outlined">

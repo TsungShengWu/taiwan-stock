@@ -6,11 +6,24 @@ const BASE_URL = `https://api.finmindtrade.com/api/v4/`;
 let token = '';
 
 export async function login() {
-  token = await fetch(
-    `${BASE_URL}login?user_id=${process.env.FINMIND_USER_ID}&password=${process.env.FINMIND_PASSWORD}`,
-    { next: { revalidate: 3600 } }, // Revalidate at most every hour.
-  ).then((res) => res.json());
+  const result = await fetch(`${BASE_URL}login`, {
+    method: 'POST',
+    body: new URLSearchParams({
+      user_id: process.env.FINMIND_USER_ID ?? '',
+      password: process.env.FINMIND_PASSWORD ?? '',
+    }).toString(),
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    next: { revalidate: 3600 }, // Revalidate at most every hour.
+  }).then((res) => res.json());
+
+  if (result.status === 200) {
+    token = result.token;
+    return;
+  }
+  throw new Error(result.msg);
 }
+
+login();
 
 export async function getStockInfoList(stockId?: string): Promise<StockInfo[]> {
   const result = await fetch(
@@ -18,13 +31,17 @@ export async function getStockInfoList(stockId?: string): Promise<StockInfo[]> {
     { next: { revalidate: 3600 } }, // Revalidate at most every hour.
   ).then((res) => res.json());
 
-  // Invalid token.
-  if (result.status === 400) {
-    await login();
-    return getStockInfoList();
+  if (result.status === 200) {
+    return result.data;
+  } else {
+    // Invalid/Expired token.
+    if (result.msg.includes('Token')) {
+      await login();
+      return getStockInfoList(stockId);
+    } else {
+      throw new Error(result.msg);
+    }
   }
-
-  return result.data;
 }
 
 export async function getMonthlyRevenue(
@@ -37,10 +54,15 @@ export async function getMonthlyRevenue(
     { next: { revalidate: 3600 } }, // Revalidate at most every hour.
   ).then((res) => res.json());
 
-  if (result.status === 400) {
-    await login();
-    return getMonthlyRevenue(stockId, startDate, endDate);
+  if (result.status === 200) {
+    return result.data;
+  } else {
+    // Invalid/Expired token.
+    if (result.msg.includes('Token')) {
+      await login();
+      return getMonthlyRevenue(stockId, startDate, endDate);
+    } else {
+      throw new Error(result.msg);
+    }
   }
-
-  return result.data;
 }
